@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.macula.cloud.admin.mapper.ADFSUserMapper">
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO
+        sys_user (
+        user_name, full_name, nick_name, sex,
+        code, birthday, grade, position, phone, mail,
+        image_url, source, is_enabled, is_deleted,
+        department_id, company_id, comments,create_by,
+        create_time,update_by, update_time
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.accountName}, #{item.chsName},
+            #{item.adAccount}, #{item.gender},
+            #{item.code}, #{item.birthday},
+            #{item.gradeType}, #{item.positionName},
+            #{item.mobilePhone}, #{item.email},
+            #{item.imageUrl}, #{item.source},
+            #{item.isEnabled}, #{item.isDeleted},
+            #{item.orgId}, #{item.companyId}, #{item.comments},
+            #{item.createBy}, now(),
+            #{item.updateBy}, now())
+        </foreach>
+    </insert>
+
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE sys_user
+            <set>
+                user_name=#{item.accountName}, full_name=#{item.chsName},
+                nick_name=#{item.adAccount}, sex=#{item.gender},
+                grade=#{item.gradeType}, position=#{item.positionName},
+                phone=#{item.mobilePhone}, mail=#{item.email},
+                image_url=#{item.imageUrl}, department_id=#{item.orgId},
+                update_time=now(), update_by=#{item.updateBy}
+            </set>
+            WHERE user_name = #{item.accountName}
+        </foreach>
+    </update>
+
+    <delete id="deleteBatch" parameterType="java.util.List">
+        delete from sys_user where user_name in
+        <foreach collection="list" item="item" index="index" open="( " close=" )" separator=",">
+            #{item.accountName}
+        </foreach>
+    </delete>
+
+</mapper>

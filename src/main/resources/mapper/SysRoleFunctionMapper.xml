@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.macula.cloud.admin.mapper.SysRoleFunctionMapper">
+
+    <delete id="deleteFunctionByUserId">
+        DELETE FROM sys_role_permission
+        WHERE role_id = #{roleId}
+
+        <if test=" userId != 1">
+            AND permission_id IN (
+            SELECT f.id FROM (
+            SELECT srp.permission_id AS id
+            FROM sys_user su
+            INNER JOIN sys_user_role sur ON sur.user_id = su.id
+            INNER JOIN sys_role sr ON sr.id = sur.role_id
+            INNER JOIN sys_role_permission srp ON srp.role_id = sr.id
+            WHERE su.id = #{userId}
+            )f
+            )
+        </if>
+
+    </delete>
+
+    <select id="queryFunctionByUserId">
+            SELECT srp.permission_id
+            FROM sys_user su
+            INNER JOIN sys_user_role sur ON sur.user_id = su.id
+            INNER JOIN sys_role sr ON sr.id = sur.role_id
+            INNER JOIN sys_role_permission srp ON srp.role_id = sr.id
+            WHERE su.id = #{userId}
+     </select>
+
+</mapper>

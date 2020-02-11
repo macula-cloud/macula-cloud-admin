@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.macula.cloud.admin.mapper.SysFunctionMapper">
+
+    <resultMap id="resultVoMap" type="org.macula.cloud.admin.entity.vo.admin.FunctionVO">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="permissionUrl" column="permission_url"/>
+        <result property="httpMethod" column="http_method"/>
+        <result property="isGroup" column="is_group"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="effectiveTime" column="effective_time"/>
+        <result property="inactiveTime" column="inactive_time"/>
+        <result property="comments" column="comments"/>
+
+        <collection property="application" ofType="org.macula.cloud.admin.entity.pojo.admin.SysApplication">
+            <result property="id" column="application_id"/>
+            <result property="appName" column="application_name"/>
+        </collection>
+        <collection property="roles" ofType="org.macula.cloud.admin.entity.pojo.privilege.Role"
+                    javaType="java.util.ArrayList">
+            <result property="id" column="role_id"/>
+            <result property="name" column="role_name"/>
+        </collection>
+    </resultMap>
+
+
+    <resultMap id="functionDetailMap" type="org.macula.cloud.admin.entity.pojo.privilege.Function">
+        <id property="id" column="id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="sortNo" column="sort_no"/>
+        <result property="description" column="description"/>
+        <result property="name" column="name"/>
+        <result property="permissionUrl" column="permission_url"/>
+        <result property="httpMethod" column="http_method"/>
+        <result property="isGroup" column="is_group"/>
+        <result property="icron" column="icron"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="effectiveTime" column="effective_time"/>
+        <result property="inactiveTime" column="inactive_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="comments" column="comments"/>
+
+        <collection property="applications" ofType="java.lang.Long" javaType="java.util.ArrayList">
+            <result property="id" column="app_application_id"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="getFunctionAll" resultMap="resultVoMap">
+        SELECT
+        sp.*,
+        sa.app_name AS application_name ,
+        sr.id AS role_id , sr.name AS role_name
+        FROM sys_permission sp
+        LEFT JOIN sys_role_permission srp ON srp.permission_id = sp.id
+        LEFT JOIN sys_role sr ON sr.id = srp.role_id
+        LEFT JOIN sys_application sa ON sp.application_id = sa.id
+        WHERE 1=1
+
+        <if test="condition.applicationId != null and condition.applicationId != ''">
+            AND sp.application_id = #{condition.applicationId}
+        </if>
+
+        <if test="condition.name != null and condition.name != ''">
+            AND sp.name LIKE CONCAT('%', #{condition.name}, '%')
+        </if>
+
+        ORDER BY sp.id DESC
+    </select>
+
+    <delete id="deleteRoleAllFunctions">
+        DELETE FROM sys_role_permission WHERE role_id IN
+        <foreach collection="roleIds" item="roleId" index="index" open="(" separator="," close=");">
+            #{roleId}
+        </foreach>
+    </delete>
+
+    <select id="queryFunctionByCondition" resultType="org.macula.cloud.admin.entity.pojo.privilege.Function">
+        SELECT
+        sp.*
+        FROM sys_permission sp
+
+        <if test="condition.roleId != null and condition.roleId != ''">
+            INNER JOIN sys_role_permission srp
+            ON srp.permission_id = sp.id AND srp.role_id = #{condition.roleId}
+        </if>
+
+        WHERE 1=1
+
+        <if test="condition.applicationId != null and condition.applicationId != ''">
+            AND sp.application_id = #{condition.applicationId}
+        </if>
+
+        <if test="condition.appId != null and condition.appId != ''">
+            AND sp.app_id = #{condition.appId}
+        </if>
+
+        <if test="condition.isGroup != null and condition.isGroup != ''">
+            AND sp.is_group = #{condition.isGroup}
+        </if>
+
+        <if test="condition.name != null and condition.name != ''">
+            AND sp.name LIKE CONCAT('%', #{condition.name}, '%')
+        </if>
+    </select>
+
+    <select id="getFunctionByUserId" resultType="org.macula.cloud.admin.entity.pojo.privilege.Function">
+        SELECT
+        sp.code,
+        sp.is_group,
+        sp.permission_url,
+        sp.http_method,
+        sp.name
+        FROM sys_permission sp
+
+        <if test="userId != null and userId != 1">
+            INNER JOIN sys_role_permission srp ON sp.id = srp.permission_id
+            INNER JOIN sys_user_role sur ON sur.role_id = srp.role_id
+            AND sur.user_id = #{userId}
+        </if>
+
+    </select>
+
+    <insert id="addFunction2Role" parameterType="org.macula.cloud.admin.entity.pojo.privilege.Role">
+        insert into sys_role_permission (
+        role_id, permission_id,
+        create_by, create_time,
+        update_by, update_time
+        )
+        values
+        <foreach collection="functionIds" item="item" index="index" separator="," close=";">
+            (
+            #{roleId}, #{item},
+            null, now(),
+            null, now()
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryById" resultMap="functionDetailMap">
+      SELECT
+      sp.*,
+      sa.id AS app_application_id
+      FROM sys_permission sp
+      LEFT JOIN sys_application_permission sap ON sap.permission_id = sp.id
+      LEFT JOIN sys_application sa ON sa.id = sap.application_id
+      WHERE sp.id = #{id}
+	</select>
+
+    <select id="queryOutterFunctionsByOpenId" resultType="org.macula.cloud.admin.entity.pojo.privilege.Function">
+        SELECT
+        sp.code,
+        sp.http_method,
+        sp.name,
+        CONCAT(sa.home_page,sp.permission_url) AS permission_url
+        FROM sys_application sa
+        INNER JOIN sys_application_permission sap ON sap.application_id = sa.id
+        INNER JOIN sys_permission sp ON sp.id = sap.permission_id
+        WHERE sa.open_id = #{openId}
+	</select>
+
+    <delete id="deleteByApplicationIds">
+        DELETE FROM sys_permission WHERE application_id IN
+        <foreach collection="ids" item="id" index="index" open="(" separator="," close=");">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="addApi2App">
+        INSERT INTO sys_application_permission
+        (
+        application_id,
+        permission_id,
+        create_by,
+        create_time,
+        update_by,
+        update_time
+        )
+        VALUES
+        <foreach collection="functionIds" item="item" index="index" separator="," close="">
+            (
+            #{appId},
+            #{item},
+            null,
+            now(),
+            null,
+            now()
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteApiFromAppByApplicationId">
+        DELETE FROM sys_application_permission WHERE application_id IN
+
+        <foreach collection="ids" item="id" index="index" open="( " close=" )" separator=",">
+            #{id}
+        </foreach>
+
+        <if test="parentId != null and parentId != ''">
+            AND permission_id IN (
+            SELECT id FROM sys_permission WHERE application_id = #{parentId}
+            )
+        </if>
+    </delete>
+
+    <delete id="deleteApiFromAppByFunctionId">
+        DELETE FROM sys_application_permission WHERE permission_id IN
+        <foreach collection="ids" item="id" index="index" open="( " close=" )" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

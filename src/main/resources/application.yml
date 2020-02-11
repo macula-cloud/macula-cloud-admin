@@ -1,0 +1,36 @@
+spring:
+   main:
+    allow-bean-definition-overriding: true
+   jackson:
+      time-zone: GMT+8
+      date-format: yyyy-MM-dd HH:mm:ss
+# Mybatis配置 如果用下面的试可以此处屏蔽
+mybatis:
+   mapperLocations: classpath:mapper/**/*.xml
+   typeAliasesPackage: org.macula.cloud.admin.entity
+   configLocation: classpath:mybatis.xml
+dynamic:
+   task:
+      threadPoolNum: 5
+infinitus:
+   url:
+      user-prefix: http://apis-test.infinitus-int.com #无限极用户路径
+      srm-prefix: http://10.86.21.76:8000 #srm用户路径
+   syncUser: #同步无限极用户数据的url  GET 分页查询两个路径参数  pageIndex  pageSize
+      url: ${infinitus.url.user-prefix}/syncUser?pageIndex=1&pageSize=%s
+   syncOrg: #同步无限极组织信息的url  GET 两个路径参数  orgId 组织id  isSearchAllChild 是否查组织的下属组织  1不查 空 查
+      url: ${infinitus.url.user-prefix}/organization
+   syncSrmUser: #同步SRM组织信息的url  POST
+      url: ${infinitus.url.srm-prefix}/zsrm_supplier?sap-client=300
+jasypt:
+   encryptor:
+      password: macula
+macula:
+   password:
+      encodeType: SHA256
+   role:
+      company_separated: false
+   user:
+      different_source_actionable: false
+      username:
+         company_separated: false

@@ -1,0 +1,32 @@
+eureka:
+   client:
+      service-url:
+         defaultZone: ${EUREKA_SERVER:http://${EUREKA_USER:macula}:${EUREKA_PASSWORD:macula2019}@${EUREKA_HOST:registry}:${EUREKA_PORT:8761}/eureka/}
+   instance:
+      prefer-ip-address: true
+server:
+   port: ${SERVER_PORT:8081}
+spring:
+   application:
+      name: macula-cloud-admin
+   profiles:
+      active: ${PROFILE_ACTIVE:test}
+   cloud:
+      config:
+         discovery:
+            enabled: true
+            service-id: macula-cloud-config
+         label: ${GIT_LABEL:master}
+         profile: ${CONFIG-PROFILE-ACTIVE:wilson}
+management:
+  endpoint:
+    health:
+      show-details: ALWAYS
+  server:
+    port: 9998
+  security:
+     enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: '*'
