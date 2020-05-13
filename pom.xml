@@ -12,6 +12,7 @@
 
 	<artifactId>macula-cloud-admin</artifactId>
 	<name>macula-cloud-admin</name>
+	<version>latest</version>
 	<description>Spring Cloud Macula Admin Extension Project</description>
 
 	<dependencies>
@@ -72,7 +73,7 @@
 				<groupId>com.spotify</groupId>
 				<artifactId>dockerfile-maven-plugin</artifactId>
 				<configuration>
-					<repository>${docker.nexus}/${project.groupId}/${project.artifactId}</repository>
+					<repository>${docker.registry}/${project.groupId}/${project.artifactId}</repository>
 					<tag>${project.version}</tag>
 					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
 					<buildArgs>
