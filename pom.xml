@@ -12,6 +12,7 @@
 
 	<artifactId>macula-cloud-admin</artifactId>
 	<name>macula-cloud-admin</name>
+	<version>latest</version>
 	<description>Spring Cloud Macula Admin Extension Project</description>
 
 	<dependencies>
