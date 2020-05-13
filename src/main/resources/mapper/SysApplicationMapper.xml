@@ -94,7 +94,7 @@
         </collection>
     </resultMap>
 
-    <resultMap id="resultVoMap3" type="org.macula.cloud.sdk.domain.SysApplication">
+    <resultMap id="resultVoMap3" type="org.macula.cloud.core.domain.SysApplication">
         <id property="id" column="id"/>
         <result property="appId" column="app_id"/>
         <result property="appName" column="app_name"/>
